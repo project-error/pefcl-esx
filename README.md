@@ -6,7 +6,7 @@ of PEFCL and ESX installed**
 ## Installation Steps:
 
 1. Download this repository and place it in the `resources` directory
-2. Add `ensure pefcl-esx` to your `server.cfg` (Start this resource after `ESX` and `PEFCL` have been started)
+2. Add `ensure pefcl-esx` to your `server.cfg` (Start this resource BEFORE `ESX` and `PEFCL` have been started)
 3. Navigate to the `config.json` in `PEFCL` and change the following settings:
    - Under `frameworkIntegration`
      - `enabled`: `true`
