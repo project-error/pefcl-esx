@@ -75,7 +75,7 @@ AddEventHandler('esx:playerLoaded', function(playerSrc, xPlayer)
     end
 
     exports.pefcl:loadPlayer(playerSrc, {
-        source = playerId,
+        source = playerSrc,
         identifier = xPlayer.getIdentifier(),
         name = xPlayer.getName()
     })
