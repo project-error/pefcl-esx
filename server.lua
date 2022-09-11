@@ -65,6 +65,12 @@ local function updateJobAccount(player, playerJob, playerLastJob)
             }
             exports.pefcl:addUserToUniqueAccount(playerSrc, data)
         end
+    elseif Config.BusinessAccounts[playerLastJob.name] then
+        local data = {
+            userIdentifier = player.getIdentifier(),
+            accountIdentifier = playerLastJob.name
+        }
+        exports.pefcl:removeUserFromUniqueAccount(playerSrc, data)
     end
 end
 
