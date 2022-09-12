@@ -27,13 +27,17 @@ local function updateJobAccount(player, playerJob, playerLastJob)
         local currentUniqueAccount = exports.pefcl:getUniqueAccount(playerSrc, playerJob.name).data;
 
         if playerLastJob ~= nil and currentUniqueAccount and playerLastJob.name ~= playerJob.name then
-            print("Removing from last job ..", playerLastJob.name)
+            print(string.format("Removing from last job: %s", playerLastJob.name))
 
-            local data = {
-                userIdentifier = player.getIdentifier(),
-                accountIdentifier = playerLastJob.name
-            }
-            exports.pefcl:removeUserFromUniqueAccount(playerSrc, data)
+            if Config.BusinessAccounts[playerLastJob.name] then
+                if playerLastJob.grade > Config.BusinessAccounts[playerLastJob.name].ContributorRole then
+                    local data = {
+                        userIdentifier = player.getIdentifier(),
+                        accountIdentifier = playerLastJob.name
+                    }
+                    exports.pefcl:removeUserFromUniqueAccount(playerSrc, data)
+                end
+            end
         end
 
         if playerLastJob.name == playerJob.name and playerLastJob.grade ~= playerJob.grade then
@@ -136,6 +140,10 @@ AddEventHandler('esx:setJob', function(playerSrc, job, lastJob)
     end
 
     updateJobAccount(xPlayer, job, lastJob)
+end)
+
+AddEventHandler('pefcl-esx:server:GetJobConfig', function(cb)
+    cb(Config.BusinessAccounts)
 end)
 
 RegisterNetEvent("pefcl-esx:server:SyncMoney", function()
