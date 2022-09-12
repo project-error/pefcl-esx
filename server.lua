@@ -24,13 +24,12 @@ local function updateJobAccount(player, playerJob, playerLastJob)
     local playerSrc = player.source
 
     if Config.BusinessAccounts[playerJob.name] then
-        local currentUniqueAccount = exports.pefcl:getUniqueAccount(playerSrc, playerJob.name).data;
 
-        if playerLastJob ~= nil and currentUniqueAccount and playerLastJob.name ~= playerJob.name then
+        if playerLastJob ~= nil and playerLastJob.name ~= playerJob.name then
             print(string.format("Removing from last job: %s", playerLastJob.name))
 
             if Config.BusinessAccounts[playerLastJob.name] then
-                if playerLastJob.grade > Config.BusinessAccounts[playerLastJob.name].ContributorRole then
+                if playerLastJob.grade >= Config.BusinessAccounts[playerLastJob.name].ContributorRole then
                     local data = {
                         userIdentifier = player.getIdentifier(),
                         accountIdentifier = playerLastJob.name
@@ -41,11 +40,23 @@ local function updateJobAccount(player, playerJob, playerLastJob)
         end
 
         if playerLastJob.name == playerJob.name and playerLastJob.grade ~= playerJob.grade then
-            local data = {
-                userIdentifier = player.getIdentifier(),
-                accountIdentifier = playerLastJob.name
-            }
-            exports.pefcl:removeUserFromUniqueAccount(playerSrc, data)
+            if playerJob.grade > playerLastJob.grade then -- neuer Job ist höher
+                if playerLastJob.grade >= Config.BusinessAccounts[playerJob.name].ContributorRole then
+                    local data = {
+                        userIdentifier = player.getIdentifier(),
+                        accountIdentifier = playerLastJob.name
+                    }
+                    exports.pefcl:removeUserFromUniqueAccount(playerSrc, data)
+                end
+            else -- alter job war höher
+                if playerLastJob.grade >= Config.BusinessAccounts[playerLastJob.name].AdminRole and playerJob.grade < Config.BusinessAccounts[playerLastJob.name].AdminRole then
+                    local data = {
+                        userIdentifier = player.getIdentifier(),
+                        accountIdentifier = playerLastJob.name
+                    }
+                    exports.pefcl:removeUserFromUniqueAccount(playerSrc, data)
+                end
+            end
         end
 
         if playerJob.grade < Config.BusinessAccounts[playerJob.name].ContributorRole then
