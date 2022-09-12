@@ -40,7 +40,7 @@ local function updateJobAccount(player, playerJob, playerLastJob)
         end
 
         if playerLastJob.name == playerJob.name and playerLastJob.grade ~= playerJob.grade then
-            if playerJob.grade > playerLastJob.grade then -- neuer Job ist höher
+            if playerJob.grade > playerLastJob.grade then -- neuer Job ist hÃ¶her
                 if playerLastJob.grade >= Config.BusinessAccounts[playerJob.name].ContributorRole then
                     local data = {
                         userIdentifier = player.getIdentifier(),
@@ -48,7 +48,7 @@ local function updateJobAccount(player, playerJob, playerLastJob)
                     }
                     exports.pefcl:removeUserFromUniqueAccount(playerSrc, data)
                 end
-            else -- alter job war höher
+            else -- alter job war hÃ¶her
                 if playerLastJob.grade >= Config.BusinessAccounts[playerLastJob.name].AdminRole and playerJob.grade < Config.BusinessAccounts[playerLastJob.name].AdminRole then
                     local data = {
                         userIdentifier = player.getIdentifier(),
