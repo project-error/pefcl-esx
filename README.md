@@ -41,7 +41,12 @@ of PEFCL and ESX installed**
                             self.triggerEvent('esx:setAccountMoney', account)
                         else
                             self.triggerEvent('esx:setAccountMoney', account)
-                            exports.pefcl:setBankBalance(playerId, { amount = money, message = message })
+                            local balance = exports.pefcl:getDefaultAccountBalance(playerId).data
+                            if balance < money then
+                                exports.pefcl:addBankBalance(playerId, { amount = money - balance, message = message or 'Eingehende Transaktion' })
+                            else
+                                exports.pefcl:removeBankBalance(playerId, { amount = balance - money, message = message or 'Eingehende Transaktion'  })
+                            end
                         end
                     end
                 end
@@ -59,19 +64,19 @@ of PEFCL and ESX installed**
                     local cash = self.getInventoryItem('cash').count
                     if cash then
                         self.addInventoryItem("cash", money)
-                        self.setAccountMoney('money', cash + money, message)
+                        self.setAccountMoney('money', cash + money, message or '')
                     end
                 elseif accountName == 'black_money' then
                     local black_money = self.getInventoryItem('black_money').count
                     if black_money then
                         self.addInventoryItem("black_money", money)
-                        self.setAccountMoney('black_money', black_money + money, message)
+                        self.setAccountMoney('black_money', black_money + money, message or '')
                     end
                 else
                     local account = self.getAccount(accountName)
                     account.money = account.money + money
                     self.triggerEvent('esx:setAccountMoney', account)
-                    exports.pefcl:addBankBalance(playerId, { amount = money, message = message })
+                    exports.pefcl:addBankBalance(playerId, { amount = money, message = message or 'Eingehende Transaktion'  })
                 end
             end
         end
@@ -89,9 +94,9 @@ of PEFCL and ESX installed**
                         self.removeInventoryItem("cash", money)
                         local newMoney = cash - money
                         if newMoney >= 0 then
-                            self.setAccountMoney('money', newMoney, message)
+                            self.setAccountMoney('money', newMoney, message or '')
                         else 
-                            self.setAccountMoney('money', 0, message)
+                            self.setAccountMoney('money', 0, message or '')
                         end
                     end
                 elseif accountName == 'black_money' then
@@ -100,16 +105,16 @@ of PEFCL and ESX installed**
                         self.removeInventoryItem("black_money", money)
                         local newMoney = black_money - money
                         if newMoney >= 0 then
-                            self.setAccountMoney('black_money', newMoney, message)
+                            self.setAccountMoney('black_money', newMoney, message or '')
                         else 
-                            self.setAccountMoney('black_money', 0, message)
+                            self.setAccountMoney('black_money', 0, message or '')
                         end
                     end
                 else
                     local account = self.getAccount(accountName)
                     account.money = account.money - money
                     self.triggerEvent('esx:setAccountMoney', account)
-                    exports.pefcl:removeBankBalance(playerId, { amount = money, message = message })
+                    exports.pefcl:removeBankBalance(playerId, { amount = money, message = message or 'Eingehende Transaktion'})
                 end
             end
         end
