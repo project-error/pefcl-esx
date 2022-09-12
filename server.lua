@@ -36,6 +36,14 @@ local function updateJobAccount(player, playerJob, playerLastJob)
             exports.pefcl:removeUserFromUniqueAccount(playerSrc, data)
         end
 
+        if playerLastJob.name == playerJob.name and playerLastJob.grade ~= playerJob.grade then
+            local data = {
+                userIdentifier = player.getIdentifier(),
+                accountIdentifier = playerLastJob.name
+            }
+            exports.pefcl:removeUserFromUniqueAccount(playerSrc, data)
+        end
+
         if playerJob.grade < Config.BusinessAccounts[playerJob.name].ContributorRole then
             print("Grade below Contributor role. Returning.")
             return
@@ -105,7 +113,7 @@ AddEventHandler("onServerResourceStart", function(resName)
 
     local xPlayers = ESX.GetExtendedPlayers()
     for _, xPlayer in pairs(xPlayers) do
-        Citizen.Wait(50)
+        Wait(50)
 
         updateJobAccount(xPlayer, xPlayer.getJob())
         exports.pefcl:loadPlayer(xPlayer.source, {
@@ -120,39 +128,6 @@ exports("addCash", addCash)
 exports("removeCash", removeCash)
 exports("getCash", getCash)
 
-AddEventHandler('esx:addAccountMoney', function(playerSrc, accountName, amount, message)
-    if accountName ~= "bank" then
-        return
-    end
-
-    exports.pefcl:addBankBalance(playerSrc, {
-        amount = amount,
-        message = message
-    })
-end)
-
-AddEventHandler('esx:removeAccountMoney', function(playerSrc, accountName, amount, message)
-    if accountName ~= "bank" then
-        return
-    end
-
-    exports.pefcl:removeBankBalance(playerSrc, {
-        amount = amount,
-        message = message
-    })
-end)
-
-AddEventHandler('esx:setAccountMoney', function(playerSrc, accountName, amount, message)
-    if accountName ~= "bank" then
-        return
-    end
-
-    exports.pefcl:setBankBalance(playerSrc, {
-        amount = amount,
-        message = message
-    })
-end)
-
 AddEventHandler('esx:setJob', function(playerSrc, job, lastJob)
     local xPlayer = ESX.GetPlayerFromId(playerSrc)
 
@@ -163,3 +138,7 @@ AddEventHandler('esx:setJob', function(playerSrc, job, lastJob)
     updateJobAccount(xPlayer, job, lastJob)
 end)
 
+RegisterNetEvent("pefcl-esx:server:SyncMoney", function()
+	local xPlayer = ESX.GetPlayerFromId(source)
+    xPlayer.SyncMoney() -- SnycMoney
+end)
