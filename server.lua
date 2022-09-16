@@ -19,6 +19,21 @@ local function getCash(src)
     return xPlayer.getMoney()
 end
 
+local function moveBankBalance(src)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    local account = xPlayer.getAccount('bank')
+
+    print("-------")
+    print("Moving money from ESX bank to PEFCL")
+    print("Balance:", account.money)
+    print("Identifier: ", xPlayer.getIdentifier())
+    print("-------")
+
+    xPlayer.setAccountMoney('bank', 0, 'AVOID_SYNC')
+
+    return account.money
+end
+
 local function updateJobAccount(player, playerJob, playerLastJob)
     local citizenid = player.identifier
     local playerSrc = player.source
@@ -113,9 +128,10 @@ end)
 exports("addCash", addCash)
 exports("removeCash", removeCash)
 exports("getCash", getCash)
+exports("moveBankBalance", moveBankBalance)
 
 AddEventHandler('esx:addAccountMoney', function(playerSrc, accountName, amount, message)
-    if accountName ~= "bank" then
+    if accountName ~= "bank" or message == "AVOID_SYNC" then
         return
     end
 
@@ -126,7 +142,7 @@ AddEventHandler('esx:addAccountMoney', function(playerSrc, accountName, amount, 
 end)
 
 AddEventHandler('esx:removeAccountMoney', function(playerSrc, accountName, amount, message)
-    if accountName ~= "bank" then
+    if accountName ~= "bank" or message == "AVOID_SYNC" then
         return
     end
 
@@ -137,7 +153,7 @@ AddEventHandler('esx:removeAccountMoney', function(playerSrc, accountName, amoun
 end)
 
 AddEventHandler('esx:setAccountMoney', function(playerSrc, accountName, amount, message)
-    if accountName ~= "bank" then
+    if accountName ~= "bank" or message == "AVOID_SYNC" then
         return
     end
 
