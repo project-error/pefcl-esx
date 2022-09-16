@@ -1,5 +1,21 @@
 ESX = nil
 
+math.randomseed(os.time())
+
+local charset = {}  do -- [0-9a-zA-Z]
+    for c = 48, 57  do table.insert(charset, string.char(c)) end
+    for c = 65, 90  do table.insert(charset, string.char(c)) end
+    for c = 97, 122 do table.insert(charset, string.char(c)) end
+end
+
+local function randomString(length)
+    if not length or length <= 0 then return '' end
+    math.randomseed(os.clock()^5)
+    return randomString(length - 1) .. charset[math.random(1, #charset)]
+end
+
+local AVOID_SYNC = randomString(20)
+
 TriggerEvent('esx:getSharedObject', function(obj)
     ESX = obj
 end)
@@ -19,18 +35,23 @@ local function getCash(src)
     return xPlayer.getMoney()
 end
 
-local function moveBankBalance(src)
+local function syncBankBalance(account)
+    if not account.isDefault then
+        return
+    end
+
+    local xPlayer = ESX.GetPlayerFromIdentifier(account.ownerIdentifier)
+
+    if not xPlayer then
+        return
+    end
+
+    xPlayer.setAccountMoney('bank', account.balance, AVOID_SYNC)
+end
+
+local function getBank(src)
     local xPlayer = ESX.GetPlayerFromId(src)
     local account = xPlayer.getAccount('bank')
-
-    print("-------")
-    print("Moving money from ESX bank to PEFCL")
-    print("Balance:", account.money)
-    print("Identifier: ", xPlayer.getIdentifier())
-    print("-------")
-
-    xPlayer.setAccountMoney('bank', 0, 'AVOID_SYNC')
-
     return account.money
 end
 
@@ -83,19 +104,13 @@ local function updateJobAccount(player, playerJob, playerLastJob)
     end
 end
 
-RegisterNetEvent('esx:playerLoaded')
-AddEventHandler('esx:playerLoaded', function(playerSrc, xPlayer)
-    if not xPlayer then
-        return
-    end
+-- Exports
+exports("addCash", addCash)
+exports("removeCash", removeCash)
+exports("getCash", getCash)
+exports("moveBankBalance", getBank)
 
-    exports.pefcl:loadPlayer(playerSrc, {
-        source = playerSrc,
-        identifier = xPlayer.getIdentifier(),
-        name = xPlayer.getName()
-    })
-end)
-
+-- EVENTS: GLOBAL
 AddEventHandler("playerDropped", function()
     local src = source
     exports.pefcl:unloadPlayer(src)
@@ -125,13 +140,21 @@ AddEventHandler("onServerResourceStart", function(resName)
     end
 end)
 
-exports("addCash", addCash)
-exports("removeCash", removeCash)
-exports("getCash", getCash)
-exports("moveBankBalance", moveBankBalance)
+-- EVENTS: ESX
+AddEventHandler('esx:playerLoaded', function(playerSrc, xPlayer)
+    if not xPlayer then
+        return
+    end
+
+    exports.pefcl:loadPlayer(playerSrc, {
+        source = playerSrc,
+        identifier = xPlayer.getIdentifier(),
+        name = xPlayer.getName()
+    })
+end)
 
 AddEventHandler('esx:addAccountMoney', function(playerSrc, accountName, amount, message)
-    if accountName ~= "bank" or message == "AVOID_SYNC" then
+    if accountName ~= "bank" or message == AVOID_SYNC then
         return
     end
 
@@ -142,7 +165,7 @@ AddEventHandler('esx:addAccountMoney', function(playerSrc, accountName, amount, 
 end)
 
 AddEventHandler('esx:removeAccountMoney', function(playerSrc, accountName, amount, message)
-    if accountName ~= "bank" or message == "AVOID_SYNC" then
+    if accountName ~= "bank" or message == AVOID_SYNC then
         return
     end
 
@@ -153,7 +176,7 @@ AddEventHandler('esx:removeAccountMoney', function(playerSrc, accountName, amoun
 end)
 
 AddEventHandler('esx:setAccountMoney', function(playerSrc, accountName, amount, message)
-    if accountName ~= "bank" or message == "AVOID_SYNC" then
+    if accountName ~= "bank" or message == AVOID_SYNC then
         return
     end
 
@@ -171,5 +194,14 @@ AddEventHandler('esx:setJob', function(playerSrc, job, lastJob)
     end
 
     updateJobAccount(xPlayer, job, lastJob)
+end)
+
+-- EVENTS: PEFCL
+AddEventHandler('pefcl:newAccountBalance', function(account)
+    syncBankBalance(account)
+end)
+
+AddEventHandler('pefcl:changedDefaultAccount', function(account)
+    syncBankBalance(account)
 end)
 
