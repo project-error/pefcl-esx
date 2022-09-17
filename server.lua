@@ -107,7 +107,7 @@ end
 exports("addCash", addCash)
 exports("removeCash", removeCash)
 exports("getCash", getCash)
-exports("moveBankBalance", getBank)
+exports("getBank", getBank)
 
 -- EVENTS: GLOBAL
 AddEventHandler("playerDropped", function()
