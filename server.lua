@@ -1,5 +1,3 @@
-ESX = nil
-
 math.randomseed(os.time())
 
 local charset = {}  do -- [0-9a-zA-Z]
@@ -14,10 +12,6 @@ local function randomString(length)
 end
 
 local AVOID_SYNC = randomString(20)
-
-TriggerEvent('esx:getSharedObject', function(obj)
-    ESX = obj
-end)
 
 local function addCash(src, amount)
     local xPlayer = ESX.GetPlayerFromId(src)
