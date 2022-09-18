@@ -19,6 +19,12 @@ local function getCash(src)
     return xPlayer.getMoney()
 end
 
+local function getBank(src)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    local account = xPlayer.getAccount('bank')
+    return account.money
+end
+
 local function updateJobAccount(player, playerJob, playerLastJob)
     local citizenid = player.identifier
     local playerSrc = player.source
@@ -142,6 +148,7 @@ end)
 exports("addCash", addCash)
 exports("removeCash", removeCash)
 exports("getCash", getCash)
+exports("getBank", getBank)
 
 AddEventHandler('esx:setJob', function(playerSrc, job, lastJob)
     local xPlayer = ESX.GetPlayerFromId(playerSrc)
