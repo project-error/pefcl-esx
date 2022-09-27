@@ -152,6 +152,10 @@ AddEventHandler('esx:playerLoaded', function(playerSrc, xPlayer)
     })
 end)
 
+AddEventHandler('esx:playerLogout', function(playerId)
+	exports.pefcl:unloadPlayer(playerId)
+end)
+
 AddEventHandler('esx:addAccountMoney', function(playerSrc, accountName, amount, message)
     if accountName ~= "bank" or message == AVOID_SYNC then
         return
