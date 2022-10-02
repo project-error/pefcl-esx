@@ -274,6 +274,15 @@ AddEventHandler('esx_addonaccount:removeMoney', function(identifier, amount)
     end
 end)
 
+AddEventHandler('esx_addonaccount:setMoney', function(identifier, amount)
+    if string.find(identifier, "society_") then
+        exports.pefcl:setMoneyByIdentifier(0, {
+            amount = amount,
+            identifier = string.gsub(identifier, "society_", "")
+        })
+    end
+end)
+
 AddEventHandler('esx:setJob', function(playerSrc, job, lastJob)
     local xPlayer = ESX.GetPlayerFromId(playerSrc)
 
