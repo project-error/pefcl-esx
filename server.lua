@@ -1,15 +1,24 @@
 ESX = nil
 
 math.randomseed(os.time())
+local charset = {}
 
-local charset = {}  do -- [0-9a-zA-Z]
-    for c = 48, 57  do table.insert(charset, string.char(c)) end
-    for c = 65, 90  do table.insert(charset, string.char(c)) end
-    for c = 97, 122 do table.insert(charset, string.char(c)) end
+do -- [0-9a-zA-Z]
+    for c = 48, 57 do
+        table.insert(charset, string.char(c))
+    end
+    for c = 65, 90 do
+        table.insert(charset, string.char(c))
+    end
+    for c = 97, 122 do
+        table.insert(charset, string.char(c))
+    end
 end
 
 local function randomString(length)
-    if not length or length <= 0 then return '' end
+    if not length or length <= 0 then
+        return ''
+    end
     return randomString(length - 1) .. charset[math.random(1, #charset)]
 end
 
@@ -35,6 +44,17 @@ local function getCash(src)
 end
 
 local function syncBankBalance(account)
+    local society = nil
+    TriggerEvent('esx_society:getSociety', account.ownerIdentifier, function(_society)
+        society = _society
+    end)
+
+    if society ~= nil then
+        TriggerEvent('esx_addonaccount:getSharedAccount', society.account, function(societyAccount)
+            societyAccount.setMoney(account.balance)
+        end)
+    end
+
     if not account.isDefault then
         return
     end
@@ -54,53 +74,100 @@ local function getBank(src)
     return account.money
 end
 
-local function updateJobAccount(player, playerJob, playerLastJob)
+local function updateSocietyAccountAccess(player, playerJob, playerLastJob)
+    local citizenid = player.identifier
+    local playerSrc = player.source
+    local society = nil
+
+    TriggerEvent('esx_society:getSociety', playerJob.name, function(_society)
+        society = _society
+    end)
+
+    if society == nil then
+        return
+    end
+
+    local currentUniqueAccount = exports.pefcl:getUniqueAccount(playerSrc, playerJob.name).data;
+
+    if playerLastJob ~= nil and playerLastJob.name then
+        local data = {
+            userIdentifier = player.getIdentifier(),
+            accountIdentifier = playerLastJob.name
+        }
+        exports.pefcl:removeUserFromUniqueAccount(playerSrc, data)
+    end
+
+    if not currentUniqueAccount then
+        local data = {
+            name = society.label,
+            type = 'shared',
+            identifier = playerJob.name
+        }
+        exports.pefcl:createUniqueAccount(playerSrc, data)
+    end
+
+    if playerJob.grade_name == "boss" then
+        local data = {
+            role = "admin",
+            accountIdentifier = playerJob.name,
+            userIdentifier = citizenid,
+            source = playerSrc
+        }
+        exports.pefcl:addUserToUniqueAccount(playerSrc, data)
+    end
+
+end
+
+local function updateBusinessAccountAccess(player, playerJob, playerLastJob)
     local citizenid = player.identifier
     local playerSrc = player.source
 
-    if Config.BusinessAccounts[playerJob.name] then
-        local currentUniqueAccount = exports.pefcl:getUniqueAccount(playerSrc, playerJob.name).data;
-
-        if playerLastJob ~= nil and currentUniqueAccount and playerLastJob.name ~= playerJob.name then
-            print("Removing from last job ..", playerLastJob.name)
-
-            local data = {
-                userIdentifier = player.getIdentifier(),
-                accountIdentifier = playerLastJob.name
-            }
-            exports.pefcl:removeUserFromUniqueAccount(playerSrc, data)
-        end
-
-        if playerJob.grade < Config.BusinessAccounts[playerJob.name].ContributorRole then
-            print("Grade below Contributor role. Returning.")
-            return
-        end
-
-        -- If account doesn't exist, lets create it.
-        if not exports.pefcl:getUniqueAccount(playerSrc, playerJob.name).data then
-            local data = {
-                name = Config.BusinessAccounts[playerJob.name].AccountName,
-                type = 'shared',
-                identifier = playerJob.name
-            }
-            exports.pefcl:createUniqueAccount(playerSrc, data)
-        end
-
-        local role = 'contributor'
-        if playerJob.grade >= Config.BusinessAccounts[playerJob.name].AdminRole then
-            role = 'admin'
-        end
-
-        if role then
-            local data = {
-                role = role,
-                accountIdentifier = playerJob.name,
-                userIdentifier = citizenid,
-                source = playerSrc
-            }
-            exports.pefcl:addUserToUniqueAccount(playerSrc, data)
-        end
+    if Config.BusinessAccounts[playerJob.name] == nil then
+        return
     end
+
+    local currentUniqueAccount = exports.pefcl:getUniqueAccount(playerSrc, playerJob.name).data;
+
+    if playerLastJob ~= nil and playerLastJob.name then
+        print("Removing from last job ..", playerLastJob.name)
+
+        local data = {
+            userIdentifier = player.getIdentifier(),
+            accountIdentifier = playerLastJob.name
+        }
+        exports.pefcl:removeUserFromUniqueAccount(playerSrc, data)
+    end
+
+    if playerJob.grade < Config.BusinessAccounts[playerJob.name].ContributorRole then
+        print("Grade below Contributor role. Returning.")
+        return
+    end
+
+    -- If account doesn't exist, lets create it.
+    if not exports.pefcl:getUniqueAccount(playerSrc, playerJob.name).data then
+        local data = {
+            name = Config.BusinessAccounts[playerJob.name].AccountName,
+            type = 'shared',
+            identifier = playerJob.name
+        }
+        exports.pefcl:createUniqueAccount(playerSrc, data)
+    end
+
+    local role = 'contributor'
+    if playerJob.grade >= Config.BusinessAccounts[playerJob.name].AdminRole then
+        role = 'admin'
+    end
+
+    if role then
+        local data = {
+            role = role,
+            accountIdentifier = playerJob.name,
+            userIdentifier = citizenid,
+            source = playerSrc
+        }
+        exports.pefcl:addUserToUniqueAccount(playerSrc, data)
+    end
+
 end
 
 -- Exports
@@ -130,7 +197,8 @@ AddEventHandler("onServerResourceStart", function(resName)
     for _, xPlayer in pairs(xPlayers) do
         Citizen.Wait(50)
 
-        updateJobAccount(xPlayer, xPlayer.getJob())
+        updateBusinessAccountAccess(xPlayer, xPlayer.getJob())
+        updateSocietyAccountAccess(xPlayer, xPlayer.getJob())
         exports.pefcl:loadPlayer(xPlayer.source, {
             source = xPlayer.source,
             identifier = xPlayer.identifier,
@@ -185,6 +253,27 @@ AddEventHandler('esx:setAccountMoney', function(playerSrc, accountName, amount, 
     })
 end)
 
+-- Handle society balance updates
+AddEventHandler('esx_addonaccount:addMoney', function(identifier, amount)
+    if string.find(identifier, "society_") then
+        exports.pefcl:addBankBalanceByIdentifier(0, {
+            amount = amount,
+            message = Config.Locale.deposited,
+            identifier = string.gsub(identifier, "society_", "")
+        })
+    end
+end)
+
+AddEventHandler('esx_addonaccount:removeMoney', function(identifier, amount)
+    if string.find(identifier, "society_") then
+        exports.pefcl:removeBankBalanceByIdentifier(0, {
+            amount = amount,
+            message = Config.Locale.withdrew,
+            identifier = string.gsub(identifier, "society_", "")
+        })
+    end
+end)
+
 AddEventHandler('esx:setJob', function(playerSrc, job, lastJob)
     local xPlayer = ESX.GetPlayerFromId(playerSrc)
 
@@ -192,7 +281,8 @@ AddEventHandler('esx:setJob', function(playerSrc, job, lastJob)
         return
     end
 
-    updateJobAccount(xPlayer, job, lastJob)
+    updateBusinessAccountAccess(xPlayer, job, lastJob)
+    updateSocietyAccountAccess(xPlayer, job, lastJob)
 end)
 
 -- EVENTS: PEFCL
