@@ -45,7 +45,8 @@ local function syncBankBalance(account)
 
     if society ~= nil then
         TriggerEvent('esx_addonaccount:getSharedAccount', society.account, function(societyAccount)
-            societyAccount.setMoney(account.balance)
+	  -- TODO: Fix this asap
+	  -- societyAccount.setMoney(account.balance)
         end)
     end
 
