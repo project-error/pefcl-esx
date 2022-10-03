@@ -337,3 +337,25 @@ AddEventHandler('pefcl:changedDefaultAccount', function(account)
     syncBankBalance(account)
 end)
 
+RegisterServerEvent('esx_billing:sendBill')
+AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, label, amount)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    local xTarget = ESX.GetPlayerFromId(playerId)
+    amount = ESX.Math.Round(amount)
+
+    if amount > 0 and xTarget then
+        TriggerEvent('esx_addonaccount:getSharedAccount', sharedAccountName, function(account)
+            if account then
+                local akaun = sharedAccountName
+                if string.match(akaun, 'society_') then
+                    akaun = akaun:gsub('society_', '')
+                end
+
+                    exports.pefcl:createInvoice(source, { to = xTarget.getName(), toIdentifier = xTarget.identifier, from = xPlayer.getName(), fromIdentifier = xPlayer.identifier, amount = amount, message = label, receiverAccountIdentifier = akaun, expiresAt = expiresAt})
+            else
+                    exports.pefcl:createInvoice(source, { to = xTarget.getName(), toIdentifier = xTarget.identifier, from = xPlayer.getName(), fromIdentifier = xPlayer.identifier, amount = amount, message = label, receiverAccountIdentifier = xPlayer.identifier, expiresAt = expiresAt})
+            end
+        end)
+    end
+end)
+
