@@ -5,6 +5,8 @@ Config.Paycheck = {
     Interval = 7 * 60000 -- Every 7 Minutes
 }
 
+Config.OxInventory = ESX.GetConfig().OxInventory
+
 -- You should not need BusinessAccounts when using ESX & esx_society
 Config.BusinessAccounts = {
     -- ['police'] = { -- Job Name
