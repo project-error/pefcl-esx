@@ -23,5 +23,7 @@ Config.BusinessAccounts = {
 
 Config.Locale = {
     deposited = "Deposited money into society account",
-    withdrew = "Withdrew money from society account"
+    withdrew = "Withdrew money from society account",
+    addItemSuccess = 'You got new Visa.',
+    addItemFailed = 'Failed to give new visa, reason:'
 }
