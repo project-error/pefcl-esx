@@ -7,6 +7,8 @@ Config.Paycheck = {
 
 Config.OxInventory = ESX.GetConfig().OxInventory
 
+Config.EnableCompanyPayouts = true
+
 -- You should not need BusinessAccounts when using ESX & esx_society
 Config.BusinessAccounts = {
     -- ['police'] = { -- Job Name
@@ -25,5 +27,12 @@ Config.Locale = {
     deposited = "Deposited money into society account",
     withdrew = "Withdrew money from society account",
     addItemSuccess = 'You got new Visa.',
-    addItemFailed = 'Failed to give new visa, reason:'
+    addItemFailed = 'Failed to give new visa, reason:',
+    welfareCheck = 'Welfare Check',
+    bankName = 'Maze Bank',
+    receivedPayCheck = 'Received paycheck',
+    receivedHelp = 'You have been paid your welfare check: $',
+    transferPayCheck = 'Transfer paycheck',
+    receivedSalary = 'You have been paid: $',
+    companyCantAfford = 'the company you\'re employeed at is too poor to pay out your salary'
 }
