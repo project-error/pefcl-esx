@@ -2,7 +2,7 @@ Config = {}
 
 Config.Paycheck = {
     Enable = false,
-    Interval = 7 * 60000 -- Every 7 Minutes
+    Interval = 7 -- Every 7 Minutes
 }
 
 Config.OxInventory = ESX.GetConfig().OxInventory
