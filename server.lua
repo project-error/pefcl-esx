@@ -37,6 +37,42 @@ local function getCash(src)
     return xPlayer.getMoney()
 end
 
+if Config.OxInventory then
+	local function getCards(source)
+		local xPlayer = ESX.GetPlayerFromId(source)
+		local cards = exports.ox_inventory:Search(xPlayer.source, 'search', 'visa')
+		local retval = {}
+		if cards then 
+			for k, v in pairs(cards) do
+				retval[#retval+1] = {
+					id = v.info.id,
+					holder = v.info.holder,
+					number = v.info.number
+				}
+			end
+		end
+		return retval
+	end
+
+	local function giveCard(source, card)
+		local xPlayer = ESX.GetPlayerFromId(source)
+		local info = {
+			id = card.id,
+			holder = card.holder,
+			number = card.number
+		}
+
+		exports.ox_inventory:AddItem(xPlayer.source, 'visa', 1, info, nil, function(success, reason)
+			if success then
+				xPlayer.showNotification(Config.Locale.addItemSuccess)
+			else
+				xPlayer.showNotification(string.format("%s %s",Config.Locale.addItemSuccess,reason))
+			end
+		end)
+	end
+end
+
+
 local function syncBankBalance(account)
     local society = nil
     TriggerEvent('esx_society:getSociety', account.ownerIdentifier, function(_society)
@@ -170,6 +206,10 @@ exports("addCash", addCash)
 exports("removeCash", removeCash)
 exports("getCash", getCash)
 exports("getBank", getBank)
+if Config.OxInventory then
+	exports("giveCard", giveCard)
+	exports("getCards", getCards)
+end
 
 -- EVENTS: GLOBAL
 AddEventHandler("playerDropped", function()
