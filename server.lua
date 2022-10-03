@@ -359,3 +359,45 @@ AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, la
     end
 end)
 
+if Config.Paycheck.Enable then
+    CreateThread(function()
+        while true do
+            Wait(Config.PaycheckInterval)
+            local xPlayers = ESX.GetExtendedPlayers()
+            for i = 1, #(xPlayers) do
+                local xPlayer = xPlayers[i]
+                local job = xPlayer.job.grade_name
+                local salary = xPlayer.job.grade_salary
+
+                if salary > 0 then
+                    if job == 'unemployed' then -- unemployed
+                        exports.pefcl:addBankBalance(xPlayer.source, { amount = salary, message = Config.Locale.welfareCheck })
+                        TriggerClientEvent('esx:showAdvancedNotification', xPlayer.source, Config.Locale.bankName, Config.Locale.receivedPayCheck, string.format("%s %s",Config.Locale.receivedHelp,salary), 'CHAR_BANK_MAZE', 9)
+                elseif Config.EnableCompanyPayouts then -- possibly a society
+                        TriggerEvent('esx_society:getSociety', xPlayer.job.name, function(society)
+                            if society ~= nil then -- verified society
+                                TriggerEvent('esx_addonaccount:getSharedAccount', society.account, function(account)
+                                    if exports.pefcl:getTotalBankBalanceByIdentifier(xPlayer.source, xPlayer.job.name).data >= salary then -- does the society money to pay its employees?
+                                        exports.pefcl:addBankBalance(xPlayer.source, { amount = salary, message = Config.Locale.receivedPayCheck })
+                                        exports.pefcl:removeBankBalanceByIdentifier(xPlayer.source, { identifier = xPlayer.job.name, amount = salary, message = Config.Locale.transferPayCheck })
+
+                                        TriggerClientEvent('esx:showAdvancedNotification', xPlayer.source, Config.Locale.bankName, Config.Locale.receivedPayCheck, string.format("%s %s",Config.Locale.receivedSalary,salary), 'CHAR_BANK_MAZE', 9)
+                                    else
+                                        TriggerClientEvent('esx:showAdvancedNotification', xPlayer.source, Config.Locale.bankName, '', Config.Locale.companyCantAfford, 'CHAR_BANK_MAZE', 1)
+                                    end
+                                end)
+                            else -- not a society
+                                exports.pefcl:addBankBalance(xPlayer.source, { amount = salary, message = Config.Locale.receivedPayCheck })
+                                TriggerClientEvent('esx:showAdvancedNotification', xPlayer.source, Config.Locale.bankName, Config.Locale.receivedPayCheck, string.format("%s %s",Config.Locale.receivedSalary,salary), 'CHAR_BANK_MAZE', 9)
+                            end
+                        end)
+                else -- generic job
+                        exports.pefcl:addBankBalance(xPlayer.source, { amount = salary, message = Config.Locale.receivedPayCheck })
+                        TriggerClientEvent('esx:showAdvancedNotification', xPlayer.source, Config.Locale.bankName, Config.Locale.receivedPayCheck, string.format("%s %s",Config.Locale.receivedSalary,salary), 'CHAR_BANK_MAZE', 9)
+                    end
+                end
+            end
+        end
+    end)
+end
+
