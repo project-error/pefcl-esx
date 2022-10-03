@@ -362,7 +362,7 @@ end)
 if Config.Paycheck.Enable then
     CreateThread(function()
         while true do
-            Wait(Config.PaycheckInterval)
+            Wait(Config.Paycheck.Interval * 60000)
             local xPlayers = ESX.GetExtendedPlayers()
             for i = 1, #(xPlayers) do
                 local xPlayer = xPlayers[i]
@@ -400,4 +400,3 @@ if Config.Paycheck.Enable then
         end
     end)
 end
-
