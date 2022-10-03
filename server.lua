@@ -152,14 +152,9 @@ end
 local function updateBusinessAccountAccess(player, playerJob, playerLastJob)
     local citizenid = player.identifier
     local playerSrc = player.source
+    local currentUniqueAccount = playerLastJob and exports.pefcl:getUniqueAccount(playerSrc, playerLastJob.name).data
 
-    if Config.BusinessAccounts[playerJob.name] == nil then
-        return
-    end
-
-    local currentUniqueAccount = exports.pefcl:getUniqueAccount(playerSrc, playerJob.name).data;
-
-    if playerLastJob ~= nil and playerLastJob.name then
+    if playerLastJob and currentUniqueAccount and playerLastJob.name ~= playerJob.name and playerLastJob.grade >= Config.BusinessAccounts[playerLastJob.name].ContributorRole then
         print("Removing from last job ..", playerLastJob.name)
 
         local data = {
