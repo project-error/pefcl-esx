@@ -1,5 +1,10 @@
 Config = {}
 
+Config.Paycheck = {
+    Enable = false,
+    Interval = 7 * 60000 -- Every 7 Minutes
+}
+
 -- You should not need BusinessAccounts when using ESX & esx_society
 Config.BusinessAccounts = {
     -- ['police'] = { -- Job Name
