@@ -14,6 +14,14 @@ Config.BusinessAccounts = {
     -- }
 }
 
+--
+-- If you have ox_inventory you can enable it here.
+-- This will expose the required exports for physical cards.
+-- 
+-- Make sure to update config.json in "PEFCL" as well to enable physical cards.
+--
+Config.OxInventory = false
+
 Config.Locale = {
     deposited = "Deposited money into society account",
     withdrew = "Withdrew money from society account"

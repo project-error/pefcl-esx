@@ -51,8 +51,8 @@ local function syncBankBalance(account)
 
     if society ~= nil then
         TriggerEvent('esx_addonaccount:getSharedAccount', society.account, function(societyAccount)
-	  -- TODO: Fix this asap
-	  -- societyAccount.setMoney(account.balance)
+            -- TODO: Fix this asap
+            -- societyAccount.setMoney(account.balance)
         end)
     end
 
@@ -73,6 +73,32 @@ local function getBank(src)
     local xPlayer = ESX.GetPlayerFromId(src)
     local account = xPlayer.getAccount('bank')
     return account.money
+end
+
+local function getCards(src)
+    local retval = {}
+    -- local inv = exports.ox_inventory:Inventory(src)
+    local cards = exports.ox_inventory:Search(src, 'slots', 'mastercard')
+
+    for _, v in pairs(cards) do
+        retval[#retval + 1] = {
+            id = v.metadata.id,
+            holder = v.metadata.holder,
+            number = v.metadata.number
+        }
+    end
+
+    return retval
+end
+
+local function giveCard(src, card)
+    -- local inv = exports.ox_inventory:Inventory(src)
+    exports.ox_inventory:AddItem(src, 'mastercard', 1, {
+        id = card.id,
+        holder = card.holder,
+        number = card.number,
+        description = ('Card Number: %s'):format(card.number)
+    })
 end
 
 local function updateSocietyAccountAccess(player, playerJob, playerLastJob)
@@ -177,6 +203,11 @@ exports("removeCash", removeCash)
 exports("getCash", getCash)
 exports("getBank", getBank)
 
+if GetResourceState("ox_inventory") == "started" then
+    exports("getCards", getCards)
+    exports("giveCard", giveCard)
+end
+
 -- EVENTS: GLOBAL
 AddEventHandler("playerDropped", function()
     local src = source
@@ -222,7 +253,7 @@ AddEventHandler('esx:playerLoaded', function(playerSrc, xPlayer)
 end)
 
 AddEventHandler('esx:playerLogout', function(playerId)
-	exports.pefcl:unloadPlayer(playerId)
+    exports.pefcl:unloadPlayer(playerId)
 end)
 
 AddEventHandler('esx:addAccountMoney', function(playerSrc, accountName, amount, message)
