@@ -203,7 +203,7 @@ exports("removeCash", removeCash)
 exports("getCash", getCash)
 exports("getBank", getBank)
 
-if GetResourceState("ox_inventory") == "started" then
+if Config.OxInventory then
     exports("getCards", getCards)
     exports("giveCard", giveCard)
 end
