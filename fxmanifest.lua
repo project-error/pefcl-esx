@@ -4,4 +4,4 @@ description 'PEFCL framework integration for ESX'
 author "Project Error"
 lua54 'yes'
 
-server_scripts {'server.lua', 'config.lua'}
+server_scripts { 'config.lua', 'server.lua' }
