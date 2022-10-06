@@ -20,7 +20,6 @@ Config.BusinessAccounts = {
 -- 
 -- Make sure to update config.json in "PEFCL" as well to enable physical cards.
 --
-Config.OxInventory = false
 
 Config.Locale = {
     deposited = "Deposited money into society account",
