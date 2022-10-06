@@ -1,10 +1,3 @@
-ESX = nil
-
-TriggerEvent('esx:getSharedObject', function(obj)
-    ESX = obj
-end)
-
-math.randomseed(os.time())
 local charset = {}
 
 do -- [0-9a-zA-Z]
