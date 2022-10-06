@@ -196,7 +196,7 @@ exports("removeCash", removeCash)
 exports("getCash", getCash)
 exports("getBank", getBank)
 
-if Config.OxInventory then
+if ESX.GetConfig().OxInventory then
     exports("getCards", getCards)
     exports("giveCard", giveCard)
 end
